@@ -1,0 +1,33 @@
+{
+  "name": "corejs-upgrade-webpack-plugin",
+  "version": "1.0.0",
+  "description": "a webpack plugin that transforms core-js v2 paths to core-js v3 paths",
+  "keywords": [
+    "core-js",
+    "webpack",
+    "transform",
+    "path",
+    "resolve"
+  ],
+  "license": "MIT",
+  "author": "Norbert de Langen <ndelangen@me.com>",
+  "main": "dist/index.js",
+  "scripts": {
+    "prepublish": "npm run build",
+    "build": "babel src -d dist --extensions '.ts'",
+    "test": "jest"
+  },
+  "dependencies": {
+    "resolve-from": "^5.0.0",
+    "webpack": "^4.33.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.4.5",
+    "@babel/preset-typescript": "^7.3.3",
+    "@types/webpack": "^4.4.32",
+    "eslint": "^5.16.0",
+    "jest": "^24.8.0"
+  }
+}
