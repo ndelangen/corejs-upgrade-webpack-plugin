@@ -4,17 +4,18 @@
   "description": "a webpack plugin that transforms core-js v2 paths to core-js v3 paths",
   "keywords": [
     "core-js",
-    "webpack",
-    "transform",
     "path",
-    "resolve"
+    "resolve",
+    "transform",
+    "webpack"
   ],
   "license": "MIT",
   "author": "Norbert de Langen <ndelangen@me.com>",
   "main": "dist/index.js",
   "scripts": {
-    "prepublish": "npm run build",
     "build": "babel src -d dist --extensions '.ts'",
+    "generate-types": "tsc --emitDeclarationOnly --declaration src/index.ts --esModuleInterop --outDir dist",
+    "prepublish": "npm run build && npm run generate-types",
     "test": "jest"
   },
   "dependencies": {
@@ -28,6 +29,7 @@
     "@babel/preset-typescript": "^7.3.3",
     "@types/webpack": "^4.4.32",
     "eslint": "^5.16.0",
-    "jest": "^24.8.0"
+    "jest": "^24.8.0",
+    "typescript": "^3.5.1"
   }
 }

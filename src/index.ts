@@ -9,10 +9,8 @@ const rewriteAndPreservePrefix = (originalRequest: string, newPath: string, newM
 };
 
 export const rewriteCoreJsRequest = (originalRequest: string) => {
-  if (/core-js\/modules\/(.*)/.test(originalRequest)) {
-    const modulesInformations = originalRequest.match(/core-js\/modules\/es(6|7)\.(.*)/);
-    const esVersion = modulesInformations[1];
-    const originalPath = modulesInformations[2];
+  if (/core-js\/modules\/es(6|7)\.(.*)/.test(originalRequest)) {
+    const [,esVersion, originalPath] = originalRequest.match(/core-js\/modules\/es(6|7)\.(.*)/);
 
     if (esVersion === '6') {
       return rewriteAndPreservePrefix(originalRequest, `modules/es.${originalPath}`);
@@ -23,16 +21,13 @@ export const rewriteCoreJsRequest = (originalRequest: string) => {
   }
 
   if (/core-js\/library\/fn\/(.*)/.test(originalRequest)) {
-    const modulesInformations = originalRequest.match(/core-js\/library\/fn\/(.*)/);
-    const originalPath = modulesInformations[1];
+    const [,originalPath] = originalRequest.match(/core-js\/library\/fn\/(.*)/);
 
     return rewriteAndPreservePrefix(originalRequest, `features/${originalPath}`, 'core-js-pure');
   }
 
   if (/core-js\/es(5|6|7)(.*)/.test(originalRequest)) {
-    const modulesInformations = originalRequest.match(/core-js\/es(5|6|7)(.*)?/);
-    const esVersion = modulesInformations[1];
-    const originalPath = modulesInformations[2];
+    const [,esVersion, originalPath] = originalRequest.match(/core-js\/es(5|6|7)(.*)?/);
 
     if (esVersion === '5') {
       return null;
@@ -48,8 +43,7 @@ export const rewriteCoreJsRequest = (originalRequest: string) => {
   }
 
   if (/core-js\/(object)\/(.*)/.test(originalRequest)) {
-    const modulesInformations = originalRequest.match(/core-js\/(.*)?/);
-    const originalPath = modulesInformations[1];
+    const [,originalPath] = originalRequest.match(/core-js\/(.*)?/);
 
     return rewriteAndPreservePrefix(originalRequest, `features/${originalPath}`);
   }

@@ -1,5 +1,16 @@
 import CoreJsAutoUpgradePlugin, { rewriteCoreJsRequest } from './index';
 
+describe('CoreJsAutoUpgradePlugin', () => {
+  it('should be constructable, without options', () => {
+    expect(() => new CoreJsAutoUpgradePlugin()).not.toThrow()
+  });
+  it('should be constructable, with options', () => {
+    expect(() => new CoreJsAutoUpgradePlugin({
+      resolveFrom: __dirname,
+    })).not.toThrow()
+  });
+});
+
 describe('rewriteCoreJsRequest', () => {
   const fakeRequire = jest.mock();
 
@@ -13,6 +24,18 @@ describe('rewriteCoreJsRequest', () => {
     it('should rewrite `core-js/modules/es7.*` import to `core-js/modules/esnext.*`', () => {
       expect(rewriteCoreJsRequest('core-js/modules/es7.math.iaddh.js')).toBe(
         'core-js/modules/esnext.math.iaddh.js'
+      );
+    });
+
+    it('should rewrite `core-js/modules/es.*` import to `core-js/modules/es.*`', () => {
+      expect(rewriteCoreJsRequest('core-js/modules/es.object.is-frozen.js')).toBe(
+        'core-js/modules/es.object.is-frozen.js'
+      );
+    });
+
+    it('should rewrite `core-js/modules/esnext.*` import to `core-js/modules/esnext.*`', () => {
+      expect(rewriteCoreJsRequest('core-js/modules/esnext.set.some.js')).toBe(
+        'core-js/modules/esnext.set.some.js'
       );
     });
   });
