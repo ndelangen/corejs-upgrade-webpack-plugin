@@ -8,44 +8,65 @@ const rewriteAndPreservePrefix = (originalRequest: string, newPath: string, newM
   return `${requestPrefix}${newModuleName}/${newPath}`;
 };
 
-export const rewriteCoreJsRequest = (originalRequest: string) => {
-  if (/core-js\/modules\/es(6|7)\.(.*)/.test(originalRequest)) {
-    const [,esVersion, originalPath] = originalRequest.match(/core-js\/modules\/es(6|7)\.(.*)/);
+const rewriteRenamedModules = (path: string) => {
+  if (path === 'web.dom.iterable') {
+    return path.replace('web.dom.', 'web.dom-collections.')
+  }
 
-    if (esVersion === '6') {
-      return rewriteAndPreservePrefix(originalRequest, `modules/es.${originalPath}`);
+  return path;
+}
+
+export const rewriteCoreJsRequest = (originalRequest: string, lowerVersion = false) => {
+  if (!originalRequest) {
+    throw new Error('no originalRequest')
+  }
+  if (/core-js\/modules\/es(6|7)\.(.*)/.test(originalRequest)) {
+    const [,matchedVersion, matchedPath] = originalRequest.match(/core-js\/modules\/es(6|7)\.(.*)/);
+
+    const version = matchedVersion;
+    const path = rewriteRenamedModules(matchedPath);
+
+    if (version === '6' || lowerVersion) {
+      return rewriteAndPreservePrefix(originalRequest, `modules/es.${path}`);
     }
-    if (esVersion === '7') {
-      return rewriteAndPreservePrefix(originalRequest, `modules/esnext.${originalPath}`);
+    if (version === '7') {
+      return rewriteAndPreservePrefix(originalRequest, `modules/esnext.${path}`);
     }
   }
 
   if (/core-js\/library\/fn\/(.*)/.test(originalRequest)) {
-    const [,originalPath] = originalRequest.match(/core-js\/library\/fn\/(.*)/);
+    const [,matchedPath] = originalRequest.match(/core-js\/library\/fn\/(.*)/);
 
-    return rewriteAndPreservePrefix(originalRequest, `features/${originalPath}`, 'core-js-pure');
+    const path = rewriteRenamedModules(matchedPath);
+
+    return rewriteAndPreservePrefix(originalRequest, `features/${path}`, 'core-js-pure');
   }
 
   if (/core-js\/es(5|6|7)(.*)/.test(originalRequest)) {
-    const [,esVersion, originalPath] = originalRequest.match(/core-js\/es(5|6|7)(.*)?/);
+    const [,matchedVersion, matchedPath] = originalRequest.match(/core-js\/es(5|6|7)(.*)?/);
 
-    if (esVersion === '5') {
+    const version = matchedVersion;
+    
+    if (version === '5') {
       return null;
     }
-    if (esVersion === '6') {
-      const asAModule = originalPath.replace('.js', '');
+    if (version === '6' || lowerVersion) {
+      const asAModule = matchedPath.replace('.js', '');
+      const path = rewriteRenamedModules(asAModule);
 
-      return rewriteAndPreservePrefix(originalRequest, `es${asAModule}`);
+      return rewriteAndPreservePrefix(originalRequest, `es${path}`);
     }
-    if (esVersion === '7') {
+    if (version === '7') {
       return null;
     }
   }
 
   if (/core-js\/(object)\/(.*)/.test(originalRequest)) {
-    const [,originalPath] = originalRequest.match(/core-js\/(.*)?/);
+    const [,matchedPath] = originalRequest.match(/core-js\/(.*)?/);
 
-    return rewriteAndPreservePrefix(originalRequest, `features/${originalPath}`);
+    const path = rewriteRenamedModules(matchedPath);
+
+    return rewriteAndPreservePrefix(originalRequest, `features/${path}`);
   }
 
   return originalRequest;
@@ -68,19 +89,31 @@ export default function CoreJSUpgradeWebpackPlugin(options: Options) {
     if (originalRequest.startsWith('./') || originalRequest.startsWith('../')) {
       return;
     }
-
+    
     try {
-      resolve(originalRequest);
+      require.resolve(originalRequest);
     } catch (originalError) {
-      const newRequest = rewriteCoreJsRequest(originalRequest);
-      if (!newRequest) {
-        throw originalError;
+      let error = true;
+
+      // attempt to upgrade the path from core-js v2 to v3
+      if (error) {
+        try {
+          // eslint-disable-next-line no-param-reassign
+          resource.request = resolve(rewriteCoreJsRequest(originalRequest));
+          error = false;
+        } catch (e) {}
       }
 
-      try {
-        // eslint-disable-next-line no-param-reassign
-        resource.request = resolve(newRequest);
-      } catch (newRequestError) {
+      // attempt to downgrade the path from es7 to es6
+      if (error) {
+        try {
+          // eslint-disable-next-line no-param-reassign
+          resource.request = resolve(rewriteCoreJsRequest(originalRequest, true));
+          error = false;
+        } catch (e) {}
+      }
+
+      if (error) {
         throw originalError;
       }
     }

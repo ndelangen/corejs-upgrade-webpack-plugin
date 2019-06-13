@@ -82,3 +82,33 @@ describe('rewriteCoreJsRequest', () => {
     );
   });
 });
+
+describe('rewriteCoreJsRequest with downgrade option enabled', () => {
+  const fakeRequire = jest.mock();
+
+  describe('rewrite `core-js/modules/*`', () => {
+    it('should rewrite `core-js/modules/es6.*` import to `core-js/modules/es.*`', () => {
+      expect(rewriteCoreJsRequest('core-js/modules/es6.object.is-frozen.js', true)).toBe(
+        'core-js/modules/es.object.is-frozen.js'
+      );
+    });
+
+    it('should rewrite `core-js/modules/es7.*` import to `core-js/modules/es.*`', () => {
+      expect(rewriteCoreJsRequest('core-js/modules/es7.symbol.async-iterator', true)).toBe(
+        'core-js/modules/es.symbol.async-iterator'
+      );
+    });
+
+    it('should rewrite `core-js/modules/es.*` import to `core-js/modules/es.*`', () => {
+      expect(rewriteCoreJsRequest('core-js/modules/es.object.is-frozen.js', true)).toBe(
+        'core-js/modules/es.object.is-frozen.js'
+      );
+    });
+
+    it('should rewrite `core-js/modules/esnext.*` import to `core-js/modules/esnext.*`', () => {
+      expect(rewriteCoreJsRequest('core-js/modules/esnext.set.some.js', true)).toBe(
+        'core-js/modules/esnext.set.some.js'
+      );
+    });
+  });
+});
