@@ -34,8 +34,8 @@ export const rewriteCoreJsRequest = (originalRequest: string, lowerVersion = fal
     }
   }
 
-  if (/core-js\/library\/fn\/(.*)/.test(originalRequest)) {
-    const [,matchedPath] = originalRequest.match(/core-js\/library\/fn\/(.*)/);
+  if (/core-js(?:\/library)?\/fn\/(.*)/.test(originalRequest)) {
+    const [,matchedPath] = originalRequest.match(/core-js(?:\/library)?\/fn\/(.*)/);
 
     const path = rewriteRenamedModules(matchedPath);
 
