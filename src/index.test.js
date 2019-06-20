@@ -40,9 +40,15 @@ describe('rewriteCoreJsRequest', () => {
     });
   });
 
-  describe('rewrite `core-js/library/fn/*`', () => {
+  describe('rewrite `core-js/library/fn/*` and `core-js/fn/*`', () => {
     it('should rewrite `core-js/library/*` import to `core-js-pure/features/*`', () => {
       expect(rewriteCoreJsRequest('core-js/library/fn/object/assign')).toBe(
+        'core-js-pure/features/object/assign'
+      );
+    });
+
+    it('should rewrite `core-js/fn/*` import to `core-js-pure/features/*`', () => {
+      expect(rewriteCoreJsRequest('core-js/fn/object/assign')).toBe(
         'core-js-pure/features/object/assign'
       );
     });
