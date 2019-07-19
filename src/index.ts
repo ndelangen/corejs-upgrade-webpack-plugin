@@ -85,7 +85,7 @@ export default function CoreJSUpgradeWebpackPlugin(options: Options) {
   const resolve = options.resolveFrom ? resolveFrom.bind(null, options.resolveFrom) : require.resolve;
   
   return new NormalModuleReplacementPlugin(/core-js/, resource => {
-    const originalRequest = resource.request as string;
+    const originalRequest = (resource.userRequest || resource.request) as string;
     if (originalRequest.startsWith('./') || originalRequest.startsWith('../')) {
       return;
     }
