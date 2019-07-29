@@ -89,6 +89,9 @@ export default function CoreJSUpgradeWebpackPlugin(options: Options) {
     if (originalRequest.startsWith('./') || originalRequest.startsWith('../')) {
       return;
     }
+    if (originalRequest.match(/@babel\/runtime\/core-js/)) {
+      return;
+    }
     
     try {
       require.resolve(originalRequest);
