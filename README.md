@@ -34,6 +34,6 @@ import CoreJSUpgradeWebpackPlugin from 'corejs-upgrade-webpack-plugin';
 
 // add this to your webpack.plugins config
 new CoreJSUpgradeWebpackPlugin({
-  resolveFrom: process.cwd(),
+  resolveFrom: [process.cwd()],
 });
 ```

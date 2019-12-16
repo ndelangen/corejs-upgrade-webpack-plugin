@@ -73,16 +73,18 @@ export const rewriteCoreJsRequest = (originalRequest: string, lowerVersion = fal
 };
 
 export interface Options {
-  resolveFrom: string | false;
+  resolveFrom: string | false | string[];
 }
 
 const defaultOptions = {
   resolveFrom: false,
+  resolveBackup: false,
 } as Options
 
 export default function CoreJSUpgradeWebpackPlugin(options: Options) {
   options = Object.assign({}, defaultOptions, options || {});
-  const resolve = options.resolveFrom ? resolveFrom.bind(null, options.resolveFrom) : require.resolve;
+
+  const resolvers = options.resolveFrom ? [].concat(options.resolveFrom).map(r => resolveFrom.bind(null, r)) : [];
   
   return new NormalModuleReplacementPlugin(/core-js/, resource => {
     const originalRequest = (resource.userRequest || resource.request) as string;
@@ -92,28 +94,39 @@ export default function CoreJSUpgradeWebpackPlugin(options: Options) {
     if (originalRequest.match(/@babel\/runtime\/core-js/)) {
       return;
     }
-    
+
     try {
       require.resolve(originalRequest);
     } catch (originalError) {
       let error = true;
 
-      // attempt to upgrade the path from core-js v2 to v3
-      if (error) {
-        try {
-          // eslint-disable-next-line no-param-reassign
-          resource.request = resolve(rewriteCoreJsRequest(originalRequest));
-          error = false;
-        } catch (e) {}
-      }
-
-      // attempt to downgrade the path from es7 to es6
-      if (error) {
-        try {
-          // eslint-disable-next-line no-param-reassign
-          resource.request = resolve(rewriteCoreJsRequest(originalRequest, true));
-          error = false;
-        } catch (e) {}
+      for (const resolve of resolvers) {
+        // attempt the core-js v2 from backup
+        if (error) {
+          try {
+            // eslint-disable-next-line no-param-reassign
+            resource.request = resolve(originalRequest);
+            error = false;
+          } catch (e) {}
+        }
+  
+        // attempt to upgrade the path from core-js v2 to v3 from backup
+        if (error) {
+          try {
+            // eslint-disable-next-line no-param-reassign
+            resource.request = resolve(rewriteCoreJsRequest(originalRequest));
+            error = false;
+          } catch (e) {}
+        }
+  
+        // attempt to downgrade the path from es7 to es6 from backup
+        if (error) {
+          try {
+            // eslint-disable-next-line no-param-reassign
+            resource.request = resolve(rewriteCoreJsRequest(originalRequest, true));
+            error = false;
+          } catch (e) {}
+        }
       }
 
       if (error) {
