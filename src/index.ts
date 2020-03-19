@@ -46,7 +46,7 @@ export const rewriteCoreJsRequest = (originalRequest: string, lowerVersion = fal
     const [,matchedVersion, matchedPath] = originalRequest.match(/core-js\/es(5|6|7)(.*)?/);
 
     const version = matchedVersion;
-    
+
     if (version === '5') {
       return null;
     }
@@ -85,7 +85,7 @@ export default function CoreJSUpgradeWebpackPlugin(options: Options) {
   options = Object.assign({}, defaultOptions, options || {});
 
   const resolvers = options.resolveFrom ? [].concat(options.resolveFrom).map(r => resolveFrom.bind(null, r)) : [];
-  
+
   return new NormalModuleReplacementPlugin(/core-js/, resource => {
     const originalRequest = (resource.userRequest || resource.request) as string;
     if (originalRequest.startsWith('./') || originalRequest.startsWith('../')) {
@@ -96,7 +96,7 @@ export default function CoreJSUpgradeWebpackPlugin(options: Options) {
     }
 
     try {
-      require.resolve(originalRequest);
+      require.resolve(originalRequest, { paths: [resource.context] });
     } catch (originalError) {
       let error = true;
 
@@ -109,7 +109,7 @@ export default function CoreJSUpgradeWebpackPlugin(options: Options) {
             error = false;
           } catch (e) {}
         }
-  
+
         // attempt to upgrade the path from core-js v2 to v3 from backup
         if (error) {
           try {
@@ -118,7 +118,7 @@ export default function CoreJSUpgradeWebpackPlugin(options: Options) {
             error = false;
           } catch (e) {}
         }
-  
+
         // attempt to downgrade the path from es7 to es6 from backup
         if (error) {
           try {
