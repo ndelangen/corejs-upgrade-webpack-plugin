@@ -1,6 +1,6 @@
 {
   "name": "corejs-upgrade-webpack-plugin",
-  "version": "3.0.1",
+  "version": "4.0.0",
   "description": "a webpack plugin that transforms core-js v2 paths to core-js v3 paths",
   "keywords": [
     "core-js",
