@@ -1,3 +1,18 @@
+# ⛔️ DEPRECATED
+
+***This module is deprecated. It is adviced not to use this module!***
+
+Using this module could easily result in difficult to debug errors.
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+__Original description:__
+
 # CoreJS Upgrade Webpack Plugin
 
 I wrote this to ensure the latest version of core-js is used everywhere in an application.
